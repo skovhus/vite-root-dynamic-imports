@@ -1,45 +1,38 @@
-import { useState } from 'react'
-import logo from './logo.svg'
-import './App.css'
+import { useEffect, useState } from "react";
+import logo from "./logo.svg";
+import "./App.css";
+import countries from "i18n-iso-countries";
+
+const dynamicLanguage = "en";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      const countryNames = await import(
+        // NOTE: we need a relative path here due to Rollup dynamic import limitations
+        // https://github.com/rollup/plugins/tree/master/packages/dynamic-import-vars#limitations
+        `../../node_modules/i18n-iso-countries/langs/${dynamicLanguage}.json`
+      );
+
+      countries.registerLocale(countryNames);
+      setIsLoading(false);
+    };
+
+    load();
+  }, []);
 
   return (
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>Hello Vite + React!</p>
-        <p>
-          <button type="button" onClick={() => setCount((count) => count + 1)}>
-            count is: {count}
-          </button>
-        </p>
-        <p>
-          Edit <code>App.tsx</code> and save to test HMR updates.
-        </p>
-        <p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-          {' | '}
-          <a
-            className="App-link"
-            href="https://vitejs.dev/guide/features.html"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Vite Docs
-          </a>
-        </p>
+        {isLoading && "Dynamically loading countries..."}
+        {!isLoading && countries.langs()}
       </header>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
